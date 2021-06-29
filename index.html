@@ -11,233 +11,116 @@
 <body>
   <div id="ad">123</div>
 </body>
-<!-- <script>
-    //https://www.cnblogs.com/whnba/p/10214312.html
-    // class GLRandom {
-    //     /**
-    //      * 构造函数
-    //      * @param {number} min  最小整数值
-    //      * @param {number} max  最大整数值
-    //      * @param {Map} percentage 概率数 [值,百分比]
-    //      */
-    //     constructor(min, max, percentage = new Map()) {
-    //         this.min = Math.trunc(min);
-    //         this.max = Math.trunc(max);
-    //         this.MATH_RANGE = 100; // 分成100份
-    //         this.percentage = percentage;
-    //     }
-
-    //     get percentage() {
-    //         if (!this._percentage) {
-    //             this._percentage = new Map();
-    //         }
-    //         return this._percentage;
-    //     }
-
-    //     /**
-    //      * 分配比例
-    //      * @param {Map} map 设置 值-百分比
-    //      */
-    //     set percentage(map) {
-    //         let result = Array.from(map.values()).reduce((p, v, a) => {
-    //             return p - v;
-    //         }, 1);
-    //         for (let i = this.min; i < this.max; i++) {
-    //             if (map.has(i)) {
-    //                 this.percentage.set(i, map.get(i));
-    //             } else {
-    //                 this.percentage.set(i, result / (this.max - this.min - map.size));
-    //             }
-    //         }
-    //     }
-
-    //     /**
-    //      * 根据比例生成取值范围
-    //      */
-    //     range() {
-    //         this.percentage.keys().length = 100
-    //         for (let [key, value] of this.percentage) {
-    //             console.log(key + " = " + value);
-    //         }
-    //         let [start, random, keys] = [0, this.MATH_RANGE, Array.from(this.percentage.keys())];
-    //         console.log("GLRandom -> range -> keys", keys)
-    //         console.log("GLRandom -> range -> random", random)
-    //         console.log("GLRandom -> range -> start", start)
-    //         for (let i = 0; i < keys.length; i++) {
-    //             let temp = this.percentage.get(keys[i]);
-    //             this.percentage.set(keys[i], [start, start += temp * random]);
-    //         }
-    //     }
-
-    //     /**
-    //      * 生成随机数
-    //      */
-    //     create() {
-    //         let num = Math.random() * this.MATH_RANGE;
-    //         console.log("GLRandom -> create -> num", num)
-    //         for (let data of this.percentage.entries()) {
-    //             if (num >= data[1][0] && num < data[1][1]) {
-    //                 return data[0];
-    //             }
-    //         }
-    //         return null;
-    //     }
-    // } {
-    //     // 随机数范围 ：40~900
-    //     let random = new GLRandom(0, 100);
-
-    //     //获取概率数据
-    //     let percentageArr = await myMongoFunc.mongoCollect.mongoFind("lucky", {}).then((mongores) => {
-    //         let isArr = []
-    //         mongores.forEach((item, index) => {
-    //             isArr.push([item.index, item.lucky_percentage])
-    //         });
-    //         return isArr
-    //     })
-    //     console.log(percentageArr)
-    //     // 调整概率
-    //     // random.percentage = new Map(percentageArr);
-    //     random.percentage = new Map([
-    //         [41, 0.2], // 调整值为41的数值，概率为20% 
-    //         [46, 0.5], // 调整值为46的数值，概率为50% 
-    //         [90, 0.05] // 调整值为90的数值，概率为5% 
-    //     ]);
-    //     // 生成值区间
-    //     let awardIndex = random.range();
-    //     console.log(random.create());
-    //     // 生成概率随机数
-    //     res.json({
-    //         "state": 200,
-    //         "data": awardIndex
-    //     })
-    //     return
-    // }
-
-    class GL {
-        /**
-         * 构造函数
-         * @param {object} opt
-         * @param {number} opt.min 最小整数值
-         * @param {number} opt.max 最大整数值
-         * @param {Map} opt.fenpei 自定义概率 
-         */
-        constructor({
-            min,
-            max,
-            fenpei = new Map()
-        }) {
-            this.min = min;
-            this.max = max;
-            this.fenpei = fenpei;
-        }
-
-        /**
-         * 可分配百分比
-         */
-        get baifenbi() {
-            return (1 - this.peizhi) / (this.max - this.min - this.fenpei.size);
-        }
-
-        /**
-         * 匹配百分比
-         */
-        get peizhi() {
-            let result = 0;
-            for (let i of this.fenpei.values()) {
-                if (0 < i && i < 1) result += i;
-            }
-            return result;
-        }
-
-
-        /**
-         * 随机数
-         * @returns {number} [min,max)
-         */
-        random() {
-            let t = 0,
-                r = Math.random();
-            for (let i = this.min; i < this.max; i++) {
-                this.fenpei.has(i) ? t += this.fenpei.get(i) : t += this.baifenbi;
-                if (t > r) return i;
-            }
-            return null;
-        }
-    }
-    // let percentageArr = await myMongoFunc.mongoCollect.mongoFind("lucky", {}).then((mongores) => {
-    //     let isArr = []
-    //     mongores.forEach((item, index) => {
-    //         isArr.push([item.index, item.lucky_percentage])
-    //     });
-    //     return isArr
-    // })
-    // console.log("percentageArr", percentageArr)
-    let percentageArr = [
-        [50, 0.5],
-        [35, 0.35],
-        [5, 0.05],
-        [10, 0.1]
-    ]
-    let gl = new GL({
-        min: 1,
-        max: 100,
-        fenpei: new Map(percentageArr)
-    });
-    let htmlStr = ""
-    let arrs =[]
-    let a=b=c=d=0
-    for(let i=0 ;i<100;i++){
-    let isres = Math.floor(gl.random() / 10) * 10
-        arrs.push(isres)
-        if(isres==50){
-            a++
-        }
-        if(isres==35){
-            b++
-        }
-        if(isres==5){
-            c++
-        }
-        if(isres==10){
-            d++
-        }
-    }
-    arrs=Array.from(new Set(arrs))
-    console.log("🚀 ~ file: 1121.html ~ line 206 ~ arrs", arrs)
-    htmlStr = `
-    <p>${a/100}%</p>
-    <p>${b/100}%</p>
-    <p>${c/100}%</p>
-    <p>${d/100}%</p>
-    <p>${a}</p>
-    <p>${b}</p>
-    <p>${c}</p>
-    <p>${d}</p>
-    <p>${arrs}</p>
-    `
-    let isar = document.querySelector("#ad");
-    isar.innerHTML=htmlStr
-</script> -->
 <script>
-  let str = "asasdasdasdas"; //5a 5s 3d
-  let dotArr = [...str]
-  let hasArr = []; //[{name:"a",count:1}]
-  let finalArr = []
-  for (let i = 0; i < dotArr.length; i++) {
-    if (hasArr.indexOf(dotArr[i]) === -1) {
-      hasArr.push(dotArr[i])
+  const isar = document.querySelector("#ad");
+
+  class DuplicatesCount {
+    constructor(str) {
+      this.str = str
+    }
+    RemoveDuplicatesAndComputedCount() {
+      let dotArr = [...this.str]; //需要优化
+      let hasArr = []; //[{name:"a",count:1}]
+      let finalArr = [];
+      for (let i = 0; i < dotArr.length; i++) {
+        if (hasArr.indexOf(dotArr[i]) === -1) {
+          hasArr.push(dotArr[i]);
+        }
+      }
+      hasArr.forEach((x) => {
+        let hasCount = 0;
+        dotArr.forEach((y) => {
+          if (x === y) {
+            hasCount++;
+          }
+        });
+        finalArr.push({
+          name: x,
+          count: hasCount,
+        });
+      });
+      return finalArr
     }
   }
-  hasArr.forEach((x)=>{
-    let hasCount=0
-    dotArr.forEach(y=>{
-      if(x===y){
-        hasCount++
+  
+  //https://www.cnblogs.com/whnba/p/10214312.html
+  class GL {
+    /**
+     * 构造函数
+     * @param {object} opt
+     * @param {number} opt.min 最小整数值
+     * @param {number} opt.max 最大整数值
+     * @param {Map} opt.fenpei 自定义概率
+     */
+    constructor({
+      min,
+      max,
+      fenpei = new Map()
+    }) {
+      this.min = min;
+      this.max = max;
+      this.fenpei = fenpei;
+    }
+
+    /**
+     * 可分配百分比
+     */
+    get baifenbi() {
+      return (1 - this.peizhi) / (this.max - this.min - this.fenpei.size);
+    }
+
+    /**
+     * 匹配百分比
+     */
+    get peizhi() {
+      let result = 0;
+      for (let i of this.fenpei.values()) {
+        if (0 < i && i < 1) result += i;
       }
-    })
-    finalArr.push({name:x,count:hasCount})
+      return result;
+    }
+
+    /**
+     * 随机数
+     * @returns {number} [min,max)
+     */
+    random() {
+      let t = 0,
+        r = Math.random();
+      for (let i = this.min; i < this.max; i++) {
+        this.fenpei.has(i) ? (t += this.fenpei.get(i)) : (t += this.baifenbi);
+        if (t > r) return i;
+      }
+      return null;
+    }
+  }
+
+  const luckyConfig = {
+    percentageArr: [
+      [0, 0.2], // 调整值为41的数值，概率为20%
+      [10, 0.5], // 调整值为46的数值，概率为50%
+      [20, 0.05],
+    ],
+    max: 1, //区间为1-10 10-20 20-30 
+    min: 30
+  }
+  let gl = new GL({
+    min: luckyConfig.max,
+    max: luckyConfig.min,
+    fenpei: new Map(luckyConfig.percentageArr),
+  });
+  let htmlStr = "";
+  let RandomArrs = [];
+  let a = (b = c = d = 0);
+  for (let i = 0; i < 100; i++) {
+    let isRes = Math.floor(gl.random() / 10) * 10;
+    RandomArrs.push(isRes);
+  }
+  const res = new DuplicatesCount(RandomArrs).RemoveDuplicatesAndComputedCount()
+  res.forEach((item, index) => {
+    htmlStr += `<p>${item.name}的概率是:${item.count / 100}%</p>`
   })
-  console.log("🚀 ~ file: 1121.html ~ line 226 ~ hasArr", finalArr)
+  isar.innerHTML = htmlStr;
 </script>
 
 </html>
